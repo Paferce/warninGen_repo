@@ -1,0 +1,14 @@
+node_modules
+build
+npm-debug.log
+.env
+.env.local
+.env.development
+.git
+.gitignore
+README.md
+.vscode
+.idea
+*.log
+frontend_fail.log
+fix_bom.js
