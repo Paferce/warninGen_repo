@@ -1,0 +1,23 @@
+# Archivos de test y utilidades - NO son serverless functions
+api/check_schema.js
+api/check_twilio_logs.js
+api/check_users.js
+api/reset_password.js
+api/test_quick.js
+api/test_servicios.js
+api/test_twilio.js
+api/test_wa.js
+api/test_whatsapp.js
+api/update_schema.js
+api/ver_contactos.js
+api/schema_output.json
+
+# Dockerfiles y configs locales
+api/Dockerfile
+api/.dockerignore
+
+# Archivos de entorno locales
+api/.env
+api/.env.example
+.env
+.env.local
