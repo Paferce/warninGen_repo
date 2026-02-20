@@ -17,7 +17,7 @@ const PaginaConsentimiento = () => {
 
   const verificarToken = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/consentimiento/${token}`);
+      const response = await fetch(`/api/consentimiento/${token}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -56,7 +56,7 @@ const PaginaConsentimiento = () => {
     setEstado('procesando');
 
     try {
-      const response = await fetch(`http://localhost:3000/api/consentimiento/${token}`, {
+      const response = await fetch(`/api/consentimiento/${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
