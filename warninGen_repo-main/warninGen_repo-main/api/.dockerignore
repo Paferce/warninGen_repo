@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.env
+.env.local
+.git
+.gitignore
+README.md
+.vscode
+.idea
+*.log
+test_*.js
+check_*.js
+ver_*.js
+update_*.js
+reset_*.js
+fix_*.js
