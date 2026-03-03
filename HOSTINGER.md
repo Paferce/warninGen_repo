@@ -56,7 +56,7 @@ En el panel de Hostinger, añadir estas variables de entorno:
 
 ```env
 # React App
-REACT_APP_API_URL=https://warngen.com/api
+REACT_APP_API_URL=https://warngen.com
 
 # Node.js (para el backend si lo despliegas en Hostinger)
 NODE_ENV=production
