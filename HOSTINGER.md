@@ -2,7 +2,7 @@
 
 Esta guía te ayudará a desplegar tu aplicación React en Hostinger usando Git Deploy.
 
-## 📋 Estructura del Proyecto
+##  Estructura del Proyecto
 
 El proyecto ha sido reestructurado para ser compatible con Hostinger:
 
@@ -18,7 +18,7 @@ warning_gen/ (raíz)
 └── docs/                 # Documentación
 ```
 
-## 🚀 Despliegue en Hostinger
+##  Despliegue en Hostinger
 
 ### Paso 1: Subir Cambios a GitHub
 
@@ -163,7 +163,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 
-## 🔄 Actualizaciones Automáticas
+##  Actualizaciones Automáticas
 
 ### Configurar Webhook en GitHub
 
@@ -175,7 +175,7 @@ sudo systemctl restart nginx
 
 Ahora cada vez que hagas `git push`, Hostinger desplegará automáticamente.
 
-## 📝 Comandos Útiles
+##  Comandos Útiles
 
 ### Desarrollo Local
 
@@ -210,7 +210,7 @@ cd api && npm install
 pm2 restart warngen-api
 ```
 
-## 🐛 Solución de Problemas
+##  Solución de Problemas
 
 ### Hostinger no detecta React
 
@@ -240,12 +240,12 @@ pm2 logs warngen-api
 pm2 restart warngen-api
 ```
 
-## 🔒 Seguridad
+##  Seguridad
 
-- ✅ Nunca versionar archivos `.env`
-- ✅ Usar variables de entorno en Hostinger
-- ✅ Configurar HTTPS (Let's Encrypt)
-- ✅ Restringir acceso a puerto 3001
+-  Nunca versionar archivos `.env`
+-  Usar variables de entorno en Hostinger
+-  Configurar HTTPS (Let's Encrypt)
+-  Restringir acceso a puerto 3001
 
 ---
 

@@ -1,6 +1,6 @@
-# 🚀 Inicio Rápido - Despliegue
+#  Inicio Rápido - Despliegue
 
-## Opción 1: Docker (Más Rápido) ⚡
+## Opción 1: Docker (Más Rápido) 
 
 ### Windows
 ```bash
@@ -15,7 +15,7 @@ chmod +x deploy.sh
 
 ---
 
-## Opción 2: Docker Manual 🐳
+## Opción 2: Docker Manual 
 
 ```bash
 # 1. Configurar variables de entorno
@@ -35,7 +35,7 @@ docker-compose logs -f
 
 ---
 
-## Comandos Útiles 🛠️
+## Comandos Útiles ️
 
 ```bash
 # Ver estado
@@ -56,7 +56,7 @@ docker-compose up -d --build
 
 ---
 
-## Variables de Entorno Requeridas 📝
+## Variables de Entorno Requeridas 
 
 Editar `.env` con:
 
@@ -76,7 +76,7 @@ EMAIL_PASS=tu_app_password
 
 ---
 
-## Solución Rápida de Problemas 🔧
+## Solución Rápida de Problemas 
 
 ### Error de conexión a MySQL
 ```bash
@@ -99,7 +99,7 @@ cat .env
 
 ---
 
-## 📖 Documentación Completa
+##  Documentación Completa
 
 Ver [DEPLOYMENT.md](DEPLOYMENT.md) para:
 - Instrucciones detalladas
@@ -109,7 +109,7 @@ Ver [DEPLOYMENT.md](DEPLOYMENT.md) para:
 
 ---
 
-## ✅ Checklist Antes de Desplegar
+##  Checklist Antes de Desplegar
 
 - [ ] Docker Desktop instalado
 - [ ] Archivo `.env` configurado

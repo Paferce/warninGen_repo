@@ -133,8 +133,8 @@ node server.js
 
 Deberías ver:
 ```
-✓ Conexión a MySQL establecida correctamente
-🚀 Servidor iniciado en http://localhost:3000
+ Conexión a MySQL establecida correctamente
+ Servidor iniciado en http://localhost:3000
 ```
 
 ### 3. Configurar Frontend
@@ -309,12 +309,12 @@ const twilioClient = twilio(
 
 ## Próximos Pasos
 
-1. ✅ Demo funcional con localStorage
-2. ⏳ Integración completa con MySQL
-3. ⏳ Implementación de envíos reales
-4. ⏳ Sistema de autenticación
-5. ⏳ Panel de reportes avanzado
-6. ⏳ Aplicación móvil React Native
+1.  Demo funcional con localStorage
+2.  Integración completa con MySQL
+3.  Implementación de envíos reales
+4.  Sistema de autenticación
+5.  Panel de reportes avanzado
+6.  Aplicación móvil React Native
 
 ## Costos Estimados
 

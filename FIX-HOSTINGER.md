@@ -59,14 +59,14 @@ Ahora en Hostinger:
 - **Repositorio**: `Paferce/warngen-sistema-alertas`
 - **Rama**: `main`
 - **Ruta del proyecto**: `.` (raíz)
-- Hostinger detectará React automáticamente ✅
+- Hostinger detectará React automáticamente 
 
 ## Verificar que Hostinger detecte React
 
 Hostinger busca estos archivos en la raíz:
-- ✅ `package.json` con `react-scripts`
-- ✅ `src/` folder
-- ✅ `public/` folder
+-  `package.json` con `react-scripts`
+-  `src/` folder
+-  `public/` folder
 
 Puedes verificar ejecutando:
 

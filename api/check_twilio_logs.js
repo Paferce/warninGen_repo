@@ -18,10 +18,10 @@ async function checkLogs() {
             console.log(`Fecha: ${msg.dateCreated}`);
 
             if (msg.errorCode) {
-                console.log(`❌ ERROR CODE: ${msg.errorCode}`);
-                console.log(`❌ ERROR MESSAGE: ${msg.errorMessage}`);
+                console.log(` ERROR CODE: ${msg.errorCode}`);
+                console.log(` ERROR MESSAGE: ${msg.errorMessage}`);
             } else {
-                console.log(`✅ Sin errores`);
+                console.log(` Sin errores`);
             }
 
             console.log('---\n');

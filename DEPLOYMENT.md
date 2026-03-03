@@ -2,7 +2,7 @@
 
 Esta guía proporciona instrucciones completas para desplegar el Sistema de Alertas en producción.
 
-## 📋 Tabla de Contenidos
+##  Tabla de Contenidos
 
 - [Requisitos Previos](#requisitos-previos)
 - [Opción 1: Despliegue con Docker (Recomendado)](#opción-1-despliegue-con-docker-recomendado)

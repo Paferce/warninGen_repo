@@ -9,7 +9,7 @@ function TestApp() {
             fontFamily: 'Arial, sans-serif'
         }}>
             <h1 style={{ color: '#00587C', fontSize: '48px' }}>
-                ✅ React está funcionando!
+                 React está funcionando!
             </h1>
             <p style={{ fontSize: '24px', marginTop: '20px' }}>
                 Si ves este mensaje, React se está montando correctamente.
@@ -23,9 +23,9 @@ function TestApp() {
             }}>
                 <h2>Información de diagnóstico:</h2>
                 <ul>
-                    <li>React: ✅ Funcionando</li>
-                    <li>JavaScript: ✅ Funcionando</li>
-                    <li>Estilos inline: ✅ Funcionando</li>
+                    <li>React:  Funcionando</li>
+                    <li>JavaScript:  Funcionando</li>
+                    <li>Estilos inline:  Funcionando</li>
                 </ul>
             </div>
         </div>

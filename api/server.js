@@ -200,7 +200,7 @@ app.get('/api/plantillas', authenticateToken, async (req, res) => {
 app.post('/webhook/whatsapp', async (req, res) => {
     // Log completo para debugging
     console.log('========================================');
-    console.log('✅ Webhook WhatsApp recibido (Logs sanitizados)');
+    console.log(' Webhook WhatsApp recibido (Logs sanitizados)');
     console.log('========================================');
 
     const { From, Body } = req.body;
@@ -215,7 +215,7 @@ app.post('/webhook/whatsapp', async (req, res) => {
     console.log(`¿Mensaje coincide?: ${palabrasClave.includes(mensaje)}`);
 
     if (palabrasClave.includes(mensaje)) {
-        console.log('✅ Mensaje coincide con palabra clave. Procesando...');
+        console.log(' Mensaje coincide con palabra clave. Procesando...');
         try {
             const telefonoLimpio = From.replace('whatsapp:', '');
             console.log(`Teléfono limpio: ${telefonoLimpio}`);
@@ -225,22 +225,22 @@ app.post('/webhook/whatsapp', async (req, res) => {
                 'UPDATE contactos SET suscrito_whatsapp = 1 WHERE telefono LIKE ?',
                 [`%${telefonoLimpio}%`]
             );
-            console.log('✅ Base de datos actualizada');
+            console.log(' Base de datos actualizada');
 
             // Send confirmation reply
             console.log(`Enviando mensaje de confirmación a: ${telefonoLimpio}`);
             const resultado = await enviarWhatsApp(telefonoLimpio, 'Gracias. Su suscripción a las alertas ha sido confirmada correctamente.');
-            console.log('✅ Resultado envío confirmación:', JSON.stringify(resultado, null, 2));
+            console.log(' Resultado envío confirmación:', JSON.stringify(resultado, null, 2));
 
             if (!resultado.success) {
-                console.error('❌ ERROR: No se pudo enviar mensaje de confirmación');
+                console.error(' ERROR: No se pudo enviar mensaje de confirmación');
                 console.error('Detalles:', resultado);
             }
         } catch (error) {
-            console.error('❌ Error activando contacto via WhatsApp:', error);
+            console.error(' Error activando contacto via WhatsApp:', error);
         }
     } else {
-        console.log(`❌ Mensaje "${mensaje}" NO coincide con ninguna palabra clave`);
+        console.log(` Mensaje "${mensaje}" NO coincide con ninguna palabra clave`);
     }
     console.log('========================================');
 
