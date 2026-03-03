@@ -229,7 +229,8 @@ const CreateAlert = ({
                 }
             });
 
-            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            const token = userStr ? JSON.parse(userStr).token : null;
             const response = await fetch('/api/enviar/alerta', {
                 method: 'POST',
                 headers: {

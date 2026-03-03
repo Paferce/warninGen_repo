@@ -41,94 +41,108 @@ router.post('/alerta', async (req, res) => {
             return res.status(404).json({ error: 'No se encontraron contactos activos para los IDs proporcionados' });
         }
 
-        const resultados = {
-            email: null,
-            sms: null,
-            whatsapp: null
-        };
-
-        // Procesar cada canal activo
-        for (const canal of Object.keys(canales)) {
-            if (canales[canal]) {
-                const plantillaId = plantillas_ids[canal];
-                if (!plantillaId) continue;
-
-                // Obtener plantilla para este canal
-                const [plantillas] = await pool.query(
-                    'SELECT * FROM plantillas WHERE id = ? AND activa = TRUE',
-                    [plantillaId]
-                );
-
-                if (plantillas.length === 0) {
-                    console.warn(`Plantilla ${plantillaId} para ${canal} no encontrada o inactiva`);
-                    continue;
-                }
-                const plantilla = plantillas[0];
-
-                // Filtrar destinatarios suscritos a este canal
-                // Nota: "whatsapp" como propiedad en contacto puede ser el numero.
-                const campoContacto = canal === 'sms' ? 'telefono' : (canal === 'whatsapp' ? 'whatsapp' : 'email');
-                const campoSuscripcion = `suscrito_${canal}`;
-
-                const destinatarios = contactos
-                    .filter(c => c[campoContacto] && c[campoSuscripcion])
-                    .map(c => ({
-                        destinatario: c[campoContacto],
-                        variables: { ...variables, nombre: c.nombre }
-                    }));
-
-                if (destinatarios.length > 0) {
-                    const resultadosCanal = {
-                        exitosos: 0,
-                        fallidos: 0,
-                        detalles: []
-                    };
-
-                    // Enviar
-                    for (const dest of destinatarios) {
-                        let resultado;
-                        if (canal === 'email') {
-                            resultado = await enviarEmail(dest.destinatario, plantilla.asunto || 'Alerta', plantilla.mensaje, dest.variables);
-                        } else if (canal === 'sms') {
-                            resultado = await enviarSMS(dest.destinatario, plantilla.mensaje, dest.variables);
-                        } else if (canal === 'whatsapp') {
-                            resultado = await enviarWhatsApp(dest.destinatario, plantilla.mensaje, dest.variables);
-                        }
-
-                        if (resultado && resultado.success) {
-                            resultadosCanal.exitosos++;
-                        } else {
-                            resultadosCanal.fallidos++;
-                        }
-                        resultadosCanal.detalles.push(resultado);
-                    }
-
-                    resultados[canal] = resultadosCanal;
-
-                    // Guardar log en BD
-                    await pool.query(
-                        `INSERT INTO alertas (plantilla_id, estado, canal, total_destinatarios, destinatarios_exitosos, destinatarios_fallidos, fecha_enviada)
-                         VALUES (?, 'enviada', ?, ?, ?, ?, NOW())`,
-                        [plantillaId, canal, destinatarios.length, resultadosCanal.exitosos, resultadosCanal.fallidos]
-                    );
-
-                    console.log(`OK: ${canal}: ${resultadosCanal.exitosos} exitosos`);
-                }
-            }
-        }
-
-        // Resumen
-        res.json({
+        // Responder Inmediatamente (HTTP 202 Accepted) para evitar Timeout en Nginx
+        res.status(202).json({
             success: true,
-            mensaje: 'Proceso de envío completado',
+            mensaje: 'Proceso de envío iniciado en segundo plano',
             resultados: {
                 resumen: {
-                    exitosos: (resultados.email?.exitosos || 0) + (resultados.sms?.exitosos || 0) + (resultados.whatsapp?.exitosos || 0),
-                    fallidos: (resultados.email?.fallidos || 0) + (resultados.sms?.fallidos || 0) + (resultados.whatsapp?.fallidos || 0)
+                    exitosos: 'Procesando...',
+                    fallidos: 'Procesando...'
                 },
-                detalles: resultados
+                detalles: {}
             }
         });
+
+        // -------------------------------------------------------------
+        // Función asíncrona de procesamiento en segundo plano
+        // -------------------------------------------------------------
+        const procesarEnvioEnSegundoPlano = async () => {
+            const resultados = {
+                email: null,
+                sms: null,
+                whatsapp: null
+            };
+
+            try {
+                // Procesar cada canal activo
+                for (const canal of Object.keys(canales)) {
+                    if (canales[canal]) {
+                        const plantillaId = plantillas_ids[canal];
+                        if (!plantillaId) continue;
+
+                        // Obtener plantilla para este canal
+                        const [plantillas] = await pool.query(
+                            'SELECT * FROM plantillas WHERE id = ? AND activa = TRUE',
+                            [plantillaId]
+                        );
+
+                        if (plantillas.length === 0) {
+                            console.warn(`Plantilla ${plantillaId} para ${canal} no encontrada o inactiva`);
+                            continue;
+                        }
+                        const plantilla = plantillas[0];
+
+                        // Filtrar destinatarios suscritos a este canal
+                        const campoContacto = canal === 'sms' ? 'telefono' : (canal === 'whatsapp' ? 'whatsapp' : 'email');
+                        const campoSuscripcion = `suscrito_${canal}`;
+
+                        const destinatarios = contactos
+                            .filter(c => c[campoContacto] && c[campoSuscripcion])
+                            .map(c => ({
+                                destinatario: c[campoContacto],
+                                variables: { ...variables, nombre: c.nombre }
+                            }));
+
+                        if (destinatarios.length > 0) {
+                            const resultadosCanal = {
+                                exitosos: 0,
+                                fallidos: 0,
+                                detalles: []
+                            };
+
+                            // Enviar
+                            for (const dest of destinatarios) {
+                                let resultado;
+                                if (canal === 'email') {
+                                    resultado = await enviarEmail(dest.destinatario, plantilla.asunto || 'Alerta', plantilla.mensaje, dest.variables);
+                                } else if (canal === 'sms') {
+                                    resultado = await enviarSMS(dest.destinatario, plantilla.mensaje, dest.variables);
+                                    await new Promise(r => setTimeout(r, 200)); // Rate limiting Twilio SMS
+                                } else if (canal === 'whatsapp') {
+                                    resultado = await enviarWhatsApp(dest.destinatario, plantilla.mensaje, dest.variables);
+                                    await new Promise(r => setTimeout(r, 200)); // Rate limiting Twilio WhatsApp
+                                }
+
+                                if (resultado && resultado.success) {
+                                    resultadosCanal.exitosos++;
+                                } else {
+                                    resultadosCanal.fallidos++;
+                                }
+                                resultadosCanal.detalles.push(resultado);
+                            }
+
+                            resultados[canal] = resultadosCanal;
+
+                            // Guardar log en BD
+                            await pool.query(
+                                `INSERT INTO alertas (plantilla_id, estado, canal, total_destinatarios, destinatarios_exitosos, destinatarios_fallidos, fecha_enviada)
+                                 VALUES (?, 'enviada', ?, ?, ?, ?, NOW())`,
+                                [plantillaId, canal, destinatarios.length, resultadosCanal.exitosos, resultadosCanal.fallidos]
+                            );
+
+                            console.log(`OK BACKGROUND: ${canal}: ${resultadosCanal.exitosos} exitosos`);
+                        }
+                    }
+                }
+                console.log('FINALIZADO: Envío en segundo plano completado.');
+            } catch (errorBg) {
+                console.error('ERROR BACKGROUND: Falla durante el envío masivo en segundo plano', errorBg);
+            }
+        };
+
+        // Iniciar proceso sin bloquear el thread de Express
+        procesarEnvioEnSegundoPlano();
 
     } catch (error) {
         console.error('Error al enviar alerta:', error);

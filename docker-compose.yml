@@ -7,10 +7,10 @@ services:
     container_name: alertas_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME:-sistema_alertas}
       MYSQL_USER: ${DB_USER:-alertas_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-alertas_password}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database:/docker-entrypoint-initdb.d
@@ -35,7 +35,7 @@ services:
       PORT: 3001
       DB_HOST: database
       DB_USER: ${DB_USER:-alertas_user}
-      DB_PASSWORD: ${DB_PASSWORD:-alertas_password}
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME:-sistema_alertas}
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
@@ -72,7 +72,7 @@ services:
     container_name: alertas_frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:8080"
     depends_on:
       - backend
     networks:

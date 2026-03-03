@@ -4,15 +4,44 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_change_in_production';
 
-// Configuración de CORS
-app.use(cors());
+// Configuración de CORS (Restrictivo)
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || 'http://localhost',
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 // IMPORTANTE: Twilio envía datos como application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware de autenticación JWT
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return res.status(401).json({ error: 'Acceso denegado: Token no proporcionado' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Acceso denegado: Token inválido o expirado' });
+        req.user = user;
+        next();
+    });
+};
+
+// Rate Limiting para Login
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // Limita a 5 peticiones por IP
+    message: { success: false, error: 'Demasiados intentos de inicio de sesión desde esta IP, por favor inténtalo de nuevo después de 15 minutos' }
+});
 
 // Configuración del Pool de MySQL
 const pool = mysql.createPool({
@@ -35,11 +64,11 @@ const { enviarWhatsApp } = require('./whatsapp_service');
 
 // Importar rutas
 const enviarRoutes = require('./routes/enviar.routes');
-app.use('/api/enviar', enviarRoutes);
+app.use('/api/enviar', authenticateToken, enviarRoutes);
 
 // --- ENDPOINTS DE AUTENTICACIÓN ---
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
     const { email, password } = req.body;
     try {
         const [rows] = await pool.execute('SELECT * FROM usuarios WHERE email = ?', [email]);
@@ -47,10 +76,28 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(401).json({ success: false, error: 'Usuario no encontrado' });
         }
         const usuario = rows[0];
-        // En un sistema real usaríamos bcrypt.compare
-        // Por ahora, si la contraseña coincide (o si es desarrollo)
-        if (password === usuario.password) {
-            res.json({ success: true, user: { id: usuario.id, nombre: usuario.nombre, email: usuario.email } });
+        
+        let passwordMatch = false;
+        
+        // Soporte retrocompatible (si la DB aún tiene contraseñas en texto plano, la hasheamos al vuelo)
+        if (usuario.password && usuario.password.startsWith('$2')) {
+            passwordMatch = await bcrypt.compare(password, usuario.password);
+        } else {
+            passwordMatch = (password === usuario.password);
+            if (passwordMatch) {
+                // Actualizar a hash seguro para futuros logins
+                const hashedPassword = await bcrypt.hash(password, 10);
+                await pool.execute('UPDATE usuarios SET password = ? WHERE id = ?', [hashedPassword, usuario.id]);
+            }
+        }
+
+        if (passwordMatch) {
+            const token = jwt.sign(
+                { id: usuario.id, email: usuario.email, rol: usuario.rol || 'administrador' },
+                JWT_SECRET,
+                { expiresIn: '8h' }
+            );
+            res.json({ success: true, token, user: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, rol: usuario.rol || 'administrador' } });
         } else {
             res.status(401).json({ success: false, error: 'Contraseña incorrecta' });
         }
@@ -62,7 +109,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // --- ENDPOINTS DE CONTACTOS ---
 
-app.get('/api/contactos', async (req, res) => {
+app.get('/api/contactos', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM contactos ORDER BY nombre ASC');
         res.json(rows);
@@ -72,7 +119,7 @@ app.get('/api/contactos', async (req, res) => {
     }
 });
 
-app.post('/api/contactos', async (req, res) => {
+app.post('/api/contactos', authenticateToken, async (req, res) => {
     const {
         nombre, email, telefono, whatsapp,
         tipo_usuario, tipo_punto_critico,
@@ -124,7 +171,7 @@ app.post('/api/contactos', async (req, res) => {
     }
 });
 
-app.delete('/api/contactos/:id', async (req, res) => {
+app.delete('/api/contactos/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     try {
         await pool.execute('DELETE FROM contactos WHERE id = ?', [id]);
@@ -137,7 +184,7 @@ app.delete('/api/contactos/:id', async (req, res) => {
 
 // --- ENDPOINTS DE PLANTILLAS ---
 
-app.get('/api/plantillas', async (req, res) => {
+app.get('/api/plantillas', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.execute('SELECT * FROM plantillas ORDER BY nombre ASC');
         res.json(rows);
@@ -153,9 +200,7 @@ app.get('/api/plantillas', async (req, res) => {
 app.post('/webhook/whatsapp', async (req, res) => {
     // Log completo para debugging
     console.log('========================================');
-    console.log('✅ Webhook WhatsApp recibido');
-    console.log('Headers:', JSON.stringify(req.headers, null, 2));
-    console.log('Body completo:', JSON.stringify(req.body, null, 2));
+    console.log('✅ Webhook WhatsApp recibido (Logs sanitizados)');
     console.log('========================================');
 
     const { From, Body } = req.body;

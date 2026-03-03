@@ -137,7 +137,9 @@ function App() {
 
     const fetchPlantillas = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/plantillas`);
+            const res = await fetch(`${API_BASE_URL}/api/plantillas`, {
+                headers: { 'Authorization': `Bearer ${usuario?.token}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setPlantillas(data);
@@ -149,7 +151,9 @@ function App() {
 
     const fetchContactos = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/contactos`);
+            const res = await fetch(`${API_BASE_URL}/api/contactos`, {
+                headers: { 'Authorization': `Bearer ${usuario?.token}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setContactos(data);
@@ -188,7 +192,10 @@ function App() {
 
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${usuario?.token}`
+                },
                 body: JSON.stringify(nuevoContacto)
             });
 
@@ -215,7 +222,10 @@ function App() {
     const eliminarContacto = async (id) => {
         if (!window.confirm('¿Seguro?')) return;
         try {
-            const res = await fetch(`${API_BASE_URL}/api/contactos/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API_BASE_URL}/api/contactos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${usuario?.token}` }
+            });
             if (res.ok) fetchContactos();
         } catch (error) {
             console.error(error);
