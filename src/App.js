@@ -97,7 +97,12 @@ const MainLayout = ({ children, usuario, setUsuario }) => {
     );
 };
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+let rawApiUrl = process.env.REACT_APP_API_URL || '';
+rawApiUrl = rawApiUrl.replace(/\/+$/, ''); // Quitar slash final si existe
+if (rawApiUrl.endsWith('/api')) {
+    rawApiUrl = rawApiUrl.slice(0, -4); // Quitar /api duplicado si el usuario lo introdujo en el .env
+}
+const API_BASE_URL = rawApiUrl;
 
 function App() {
     const [usuario, setUsuario] = useState(JSON.parse(localStorage.getItem('user')) || null);
