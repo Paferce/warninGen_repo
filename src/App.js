@@ -133,6 +133,7 @@ function App() {
             fetchContactos();
             fetchPlantillas();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [usuario]);
 
     const fetchPlantillas = async () => {
